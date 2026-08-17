@@ -1,0 +1,13 @@
+{
+  "background_color": "#070812",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "ONE AI",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "ONE AI",
+  "start_url": "/",
+  "theme_color": "#8b5cf6",
+  "id": "one-ai",
+  "description": "All-in-one AI platform for creating videos, images, voice, avatars and more."
+}
