@@ -1,1 +1,1 @@
-
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}function toast(s){let x=document.createElement('div');x.textContent=s;x.style='position:fixed;right:16px;bottom:16px;background:#151a30;padding:12px 15px;border:1px solid #ffffff18;border-radius:12px;z-index:99';document.body.append(x);setTimeout(()=>x.remove(),2000)}document.querySelectorAll('[data-toast]').forEach(x=>x.onclick=()=>toast(x.dataset.toast));
