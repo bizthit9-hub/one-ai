@@ -9,5 +9,15 @@
   "start_url": "/",
   "theme_color": "#8b5cf6",
   "id": "one-ai",
-  "description": "All-in-one AI platform for creating videos, images, voice, avatars and more."
+  "description": "All-in-one AI platform for creating videos, images, voice, avatars and more.",
+  "lang": "en",
+  "categories": [
+    "developer",
+    "developer tools",
+    "education",
+    "entertainment",
+    "photo &amp; video",
+    "utilities",
+    "video"
+  ]
 }
