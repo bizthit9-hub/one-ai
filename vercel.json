@@ -1,0 +1,25 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/api/chat",
+      "destination": "/api/chat"
+    },
+    {
+      "source": "/api/health",
+      "destination": "/api/health"
+    },
+    {
+      "source": "/api/generate",
+      "destination": "/api/generate"
+    },
+    {
+      "source": "/api/usage",
+      "destination": "/api/usage"
+    },
+    {
+      "source": "/api/projects",
+      "destination": "/api/projects"
+    }
+  ]
+}

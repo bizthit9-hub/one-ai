@@ -1,0 +1,1 @@
+ONE AI premium multi-page foundation. Upload to GitHub/Vercel. All major pages are separate clickable routes; connect real AI/video providers server-side.
