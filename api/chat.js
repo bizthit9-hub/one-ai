@@ -4,12 +4,10 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // OPTIONS / CORS preflight
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  // Only POST
   if (req.method !== "POST") {
     return res.status(405).json({
       error: "Only POST requests are allowed."
@@ -27,51 +25,28 @@ export default async function handler(req, res) {
 
     const body = req.body || {};
 
-    /*
-      Accepts:
+    // Support:
+    // { message: "Hello", history: [...] }
+    // OR
+    // { messages: [...] }
 
-      {
-        "message": "Hello"
-      }
+    let messages = Array.isArray(body.messages)
+      ? body.messages
+      : Array.isArray(body.history)
+        ? body.history
+        : [];
 
-      OR:
-
-      {
-        "messages": [
-          { "role": "user", "content": "Hello" },
-          { "role": "assistant", "content": "Hi!" }
-        ]
-      }
-
-      OR:
-
-      {
-        "message": "Hello",
-        "history": [...]
-      }
-    */
-
-    let messages = [];
-
-    // Existing messages
-    if (Array.isArray(body.messages)) {
-      messages = [...body.messages];
-    }
-
-    // Frontend history support
-    if (Array.isArray(body.history)) {
-      messages = [...body.history, ...messages];
-    }
-
-    // New message
     if (body.message && typeof body.message === "string") {
-      messages.push({
-        role: "user",
-        content: body.message
-      });
+      messages = [
+        ...messages,
+        {
+          role: "user",
+          content: body.message
+        }
+      ];
     }
 
-    // Validate
+    // Keep valid messages only
     messages = messages
       .filter(
         (m) =>
@@ -87,15 +62,13 @@ export default async function handler(req, res) {
       });
     }
 
-    /*
-      Gemini uses:
-      user -> user
-      assistant -> model
+    // Separate system instruction
+    const systemMessages = messages
+      .filter((m) => m.role === "system")
+      .map((m) => m.content)
+      .join("\n\n");
 
-      System messages are converted into normal context
-      so the API remains compatible with the existing frontend.
-    */
-
+    // Gemini uses "model" instead of "assistant"
     const contents = messages
       .filter((m) => m.role !== "system")
       .map((m) => ({
@@ -107,29 +80,37 @@ export default async function handler(req, res) {
         ]
       }));
 
-    // Gemini 2.5 Flash
-    const url =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
-      encodeURIComponent(apiKey);
+    const requestBody = {
+      contents,
+      generationConfig: {
+        maxOutputTokens: 1200
+      }
+    };
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        contents,
+    if (systemMessages) {
+      requestBody.systemInstruction = {
+        parts: [
+          {
+            text: systemMessages
+          }
+        ]
+      };
+    }
 
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 1200
-        }
-      })
-    });
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey
+        },
+        body: JSON.stringify(requestBody)
+      }
+    );
 
     const data = await response.json();
 
-    // Gemini API error
     if (!response.ok) {
       console.error("Gemini API error:", data);
 
@@ -140,31 +121,23 @@ export default async function handler(req, res) {
       });
     }
 
-    // Extract Gemini response
     const reply =
       data?.candidates?.[0]?.content?.parts
-        ?.map((part) => part.text || "")
-        .join("")
-        .trim();
-
-    if (!reply) {
-      console.error("Empty Gemini response:", data);
-
-      return res.status(502).json({
-        error: "Gemini returned an empty response."
-      });
-    }
+        ?.filter((part) => typeof part.text === "string")
+        ?.map((part) => part.text)
+        ?.join("") ||
+      "I couldn't generate a response.";
 
     return res.status(200).json({
       reply,
-      model: "gemini-2.5-flash"
+      model: "gemini-3.6-flash"
     });
 
   } catch (error) {
     console.error("Chat API error:", error);
 
     return res.status(500).json({
-      error: error?.message || "Server error. Please try again."
+      error: "Server error. Please try again."
     });
   }
-  }
+}
