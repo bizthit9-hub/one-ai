@@ -1,0 +1,21 @@
+{
+  "background_color": "#8b5cf6",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "ONE AI",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "ONE AI",
+  "start_url": "/",
+  "theme_color": "#05060d",
+  "id": "one-ai",
+  "description": "All-in-one AI tools in one app",
+  "lang": "en",
+  "categories": [
+    "developer tools",
+    "development",
+    "photo &amp; video",
+    "utilities",
+    "video"
+  ]
+}
